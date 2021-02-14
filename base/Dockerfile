@@ -1,4 +1,4 @@
-FROM nci/buster-slim-base:latest
+FROM debian:buster-slim
 
 ARG BUILD_DATE
 ARG VERSION
@@ -15,37 +15,25 @@ LABEL maintainer="Lin Song <linsongui@gmail.com>" \
     org.opencontainers.image.source="https://github.com/hwdsl2/docker-ipsec-vpn-server" \
     org.opencontainers.image.documentation="https://github.com/hwdsl2/docker-ipsec-vpn-server"
 
-ENV IMAGE_VER $BUILD_DATE
-ENV SWAN_VER 4.2
-ENV APT_SOURCE_URL https://mirrors.ustc.edu.cn/repogen/conf/debian-https-4-buster
-ENV CONF "/media/home/conf"
-
 WORKDIR /opt/src
 
 
-RUN apt-get -yqq update \
+RUN apt-get -yqq  update \
     && DEBIAN_FRONTEND=noninteractive \
        apt-get -yqq --no-install-recommends  install \
-	 gpg   gpg-agent ca-certificates \
-         wget curl dnsutils iproute2 \
-         gawk net-tools iptables \
-         strongswan xl2tpd ppp lsof ipset \
-         netfilter-persistent iptables-persistent redis-tools \
+	 gpg gpg-agent ca-certificates
+
+COPY ./files/ustc-buster.list  /etc/apt/sources.list.d/
+COPY ./files/trusted-keys-buster  /tmp/
+RUN cp /dev/null /etc/apt/sources.list
+RUN apt-key add /tmp/trusted-keys-buster && \
+    apt-get -yqq update \
+    && DEBIAN_FRONTEND=noninteractive \
+       apt-get -yqq --no-install-recommends  install \
+         wget curl gawk net-tools iptables \
     && apt-get -yqq autoremove \
     && apt-get -y clean \
-    && rm -rf /var/lib/apt/lists/* \
-    && update-alternatives --set iptables /usr/sbin/iptables-legacy
+    && rm -rf /var/lib/apt/lists/*
 
-COPY ./run.sh /opt/src/run.sh
-COPY files/rules.v4 /opt/src/
-COPY files/strongSwan-deploy.sh /opt/src/
-COPY files/init-l2tp-redsocks2.sh /opt/src/
 
-RUN chmod 755 /opt/src/run.sh
-RUN chmod 755 /opt/src/strongSwan-deploy.sh
-RUN chmod 755 /opt/src/init-l2tp-redsocks2.sh
-RUN chmod 755 /opt/src/run.sh
-
-EXPOSE 500/udp 4500/udp
-
-CMD ["/opt/src/run.sh"]
+CMD ["bash"]
