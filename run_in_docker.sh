@@ -25,3 +25,6 @@ onespace() { printf '%s' "$1" | tr -s ' '; }
 noquotes() { printf '%s' "$1" | sed -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/"; }
 noquotes2() { printf '%s' "$1" | sed -e 's/" "/ /g' -e "s/' '/ /g"; }
 
+#/opt/src/strongSwan-deploy.sh
+#/opt/src/init-l2tp-redsocks2.sh restart
+exit 0

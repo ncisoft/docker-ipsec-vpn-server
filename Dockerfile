@@ -23,29 +23,30 @@ ENV CONF "/media/home/conf"
 WORKDIR /opt/src
 
 
-RUN apt-get -yqq update \
-    && DEBIAN_FRONTEND=noninteractive \
-       apt-get -yqq --no-install-recommends  install \
-	 gpg   gpg-agent ca-certificates \
-         wget curl dnsutils iproute2 \
-         gawk net-tools iptables \
-         strongswan xl2tpd ppp lsof ipset \
-         netfilter-persistent iptables-persistent redis-tools \
-    && apt-get -yqq autoremove \
-    && apt-get -y clean \
-    && rm -rf /var/lib/apt/lists/* \
+RUN apt-get -yqq update                                \
+    && DEBIAN_FRONTEND=noninteractive                  \
+       apt-get -yqq --no-install-recommends install    \
+         wget curl sudo curl dnsutils iproute2 \
+         gawk net-tools iptables                       \
+         redis-tools                                   \
+    && apt-get -yqq autoremove                         \
+    && apt-get -y clean                                \
+    && rm -rf /var/lib/apt/lists/*                     \
     && update-alternatives --set iptables /usr/sbin/iptables-legacy
 
-COPY ./run.sh /opt/src/run.sh
+RUN mkdir -p /etc/redsocks2
+COPY ./run_in_docker.sh /opt/src/run.sh
 COPY files/rules.v4 /opt/src/
 COPY files/strongSwan-deploy.sh /opt/src/
 COPY files/init-l2tp-redsocks2.sh /opt/src/
+COPY files/redsocks2 /usr/local/sbin/
+COPY files/redsocks.conf /etc/redsocks2/
 
 RUN chmod 755 /opt/src/run.sh
 RUN chmod 755 /opt/src/strongSwan-deploy.sh
 RUN chmod 755 /opt/src/init-l2tp-redsocks2.sh
 RUN chmod 755 /opt/src/run.sh
 
-EXPOSE 500/udp 4500/udp
+#EXPOSE 500/udp 4500/udp
 
-CMD ["/opt/src/run.sh"]
+CMD ["/bin/bash"]

@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  vpn:
+    image: nci/strongswan
+    volumes:
+      - /lib/modules:/lib/modules
+      - /dev:/dev
+    restart: always
+    env_file:
+      - ./l2tp.env
+    cap_add:
+      - ALL
+    ports:
+      - "500:500/udp"
+      - "4500:4500/udp"
+    privileged: true
+    hostname: openvpn
+    container_name: nci-strongswan
+    stdin_open: true # docker run -i
+    tty: true        # docker run -
+    # docker-compose run --rm  vpn
